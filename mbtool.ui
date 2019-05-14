@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mbtool</class>
+ <widget class="QMainWindow" name="mbtool">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>582</width>
+    <height>582</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>mbtool</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QPushButton" name="import_multiple_levels_btn">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>490</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;import levels from a preformatted directory:&lt;/p&gt;&lt;p&gt;directory_structure:&lt;/p&gt;&lt;p&gt;- my_levels/&lt;/p&gt;&lt;p&gt;- - level1/&lt;/p&gt;&lt;p&gt;- - - level1.obj&lt;/p&gt;&lt;p&gt;- - - level1.mtl&lt;/p&gt;&lt;p&gt;- - - level1.xml &amp;lt;--- config file &lt;/p&gt;&lt;p&gt;- - level2/&lt;/p&gt;&lt;p&gt;- - - level2.obj&lt;/p&gt;&lt;p&gt;- - - level2.mtl&lt;/p&gt;&lt;p&gt;- - - level2.xml &amp;lt;--- config file&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>import levels folder</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="import_root_btn">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>10</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>select the root file exported from gamecube rebuilder</string>
+    </property>
+    <property name="text">
+     <string>import root folder</string>
+    </property>
+   </widget>
+   <widget class="QListView" name="imported_levels_list">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>251</width>
+      <height>401</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="imported_levels_label">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>50</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>imported levels</string>
+    </property>
+   </widget>
+   <widget class="QListView" name="replace_queue_list">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>80</y>
+      <width>251</width>
+      <height>401</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="levels_to_be_replaced_label">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>50</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>levels to be replaced</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="replace_btn">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>490</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>replace!</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="add_to_replace_btn">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>240</y>
+      <width>41</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>add selected level for replace</string>
+    </property>
+    <property name="text">
+     <string>-&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="remove_from_replace_btn">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>290</y>
+      <width>41</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>remove selected level from replace</string>
+    </property>
+    <property name="text">
+     <string>&lt;-</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progress_bar">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>530</y>
+      <width>581</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>40</y>
+      <width>571</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="add_single_level_btn">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>490</y>
+      <width>31</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>add single level from obj/mtl/config</string>
+    </property>
+    <property name="text">
+     <string>+</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="remove_single_level_btn">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>490</y>
+      <width>31</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>remove single selected level</string>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="root_folder_label">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>16</y>
+      <width>341</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

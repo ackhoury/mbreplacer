@@ -315,6 +315,7 @@ class MBTool(QMainWindow, MBToolUI):
 
     def _replace_stage_in_root(self, obj_filename, mtl_filename, config_filename, stage_id):
         pass
+
     def _replace_btn_clicked(self):
         # for i in range(self._replace_queue_list.count()):
         #     obj_filename, mtl_filename, config_filename
@@ -375,7 +376,7 @@ def get_mbtool_dir():
     Get the mbtool dir
     :return str: mbtool root dir
     """
-    return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mbtool')
+    return os.getcwd()
 
 
 if __name__ == "__main__":

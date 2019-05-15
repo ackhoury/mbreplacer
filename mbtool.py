@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QFileDia
     QProgressBar, QStatusBar
 
 
-class ChooseStagePopupUI(object):
+class ChooseStagePopupUI:
     def __init__(self):
         self._stage_select_combobox = None  # type: QComboBox
         self._dialog_button_box = None  # type: QDialogButtonBox
@@ -45,10 +45,17 @@ class ChooseStagePopupUI(object):
         choose_stage_popup.setWindowTitle("Choose Stage to Replace")
 
     def _load_stages(self):
-        with open(os.path.join(get_current_dir(), 'mbtool2/resources', 'challenge_stages_list.txt'), 'r') as f:
+        with open(os.path.join(get_mbtool_dir(), 'resources', 'challenge_stages_list.txt'), 'r') as f:
             for line in f:
                 self._stage_select_combobox.addItem(line.strip())
                 self._stage_base_names.append(line.strip())
+
+
+class ChooseStagePopup(QMainWindow, ChooseStagePopupUI):
+    def __init__(self):
+        QMainWindow.__init__(self)
+        ChooseStagePopupUI.__init__(self)
+        self._setup_ui(self)
 
     def connect(self, callback):
         self._dialog_button_box.accepted.connect(callback)
@@ -66,14 +73,7 @@ class ChooseStagePopupUI(object):
         return self._stage_base_names[index].split(":")[0]
 
 
-class ChooseStagePopup(QMainWindow, ChooseStagePopupUI):
-    def __init__(self):
-        QMainWindow.__init__(self)
-        ChooseStagePopupUI.__init__(self)
-        self._setup_ui(self)
-
-
-class MBToolUI(object):
+class MBToolUI:
     def __init__(self):
         self._central_widget = None  # type: QWidget
         self._import_multiple_stages_btn = None  # type: QPushButton
@@ -176,6 +176,7 @@ class MBToolUI(object):
 
         mbtool.setWindowTitle("mbtool")
 
+
 class MBTool(QMainWindow, MBToolUI):
     def __init__(self):
         QMainWindow.__init__(self)
@@ -199,6 +200,7 @@ class MBTool(QMainWindow, MBToolUI):
         self._output_stage_id_key = QtCore.Qt.DisplayRole
         self._is_valid_input_key = QtCore.Qt.BackgroundRole
         self._required_extensions = ["mtl", "obj", "xml"]
+        self._imported_obj_filepaths = []
         self._replace_queue = []
 
     # button callbacks:
@@ -214,7 +216,8 @@ class MBTool(QMainWindow, MBToolUI):
             if filename in required_filenames:
                 collected_filenames.append(filename)
                 has_ext[filename.split(".")[-1]] = True
-        item_string = stage_base_name + " | ["
+
+        item_string = stage_base_name + " | has: ["
         for required_extension in self._required_extensions:
             if has_ext[required_extension]:
                 item_string += required_extension + ", "
@@ -238,11 +241,19 @@ class MBTool(QMainWindow, MBToolUI):
         file_dialog = QFileDialog()
         obj_filepath = QFileDialog.getOpenFileName(file_dialog,
                                                    "import stage .obj file",
-                                                   os.path.join(get_current_dir(), "mbtool"),
+                                                   get_mbtool_dir(),
                                                    "*.obj")[0]
+
+        if obj_filepath in self._imported_obj_filepaths:
+            duplicate_idx = self._imported_obj_filepaths.index(obj_filepath)
+            duplicate_item = self._imported_stages_list.item(duplicate_idx)
+            self._imported_stages_list.takeItem(self._imported_stages_list.row(duplicate_item))
+            del self._imported_obj_filepaths[duplicate_idx]
+
         if obj_filepath:
             self._add_single_stage(obj_filepath)
-        self._imported_stages_list.sortItems()
+            self._imported_obj_filepaths.append(obj_filepath)
+            self._imported_stages_list.sortItems()
 
     def _remove_single_stage_btn_clicked(self):
         selected_items = self._imported_stages_list.selectedItems()
@@ -254,21 +265,30 @@ class MBTool(QMainWindow, MBToolUI):
         file_dialog.setParent(self.sender())
         stages_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                               "import folder with multiple objs/mtls/configs",
-                                                              os.path.join(get_current_dir(), "mbtool2"))
+                                                              get_mbtool_dir())
         obj_filepaths = [os.path.join(dp, f)
                          for dp, dn, filenames in os.walk(stages_folder_path)
                          for f in filenames if os.path.splitext(f)[1] == '.obj']
 
         for obj_filepath in obj_filepaths:
+            if obj_filepath in self._imported_obj_filepaths:
+                duplicate_idx = self._imported_obj_filepaths.index(obj_filepath)
+                duplicate_item = self._imported_stages_list.item(duplicate_idx)
+                self._imported_stages_list.takeItem(self._imported_stages_list.row(duplicate_item))
+                del self._imported_obj_filepaths[duplicate_idx]
+
             self._add_single_stage(obj_filepath)
-        self._imported_stages_list.sortItems()
+            self._imported_obj_filepaths.append(obj_filepath)
+
+        if obj_filepaths:
+            self._imported_stages_list.sortItems()
 
     def _import_root_btn_clicked(self):
         file_dialog = QFileDialog()
         file_dialog.setParent(self.sender())
         self._root_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                                   "import root folder extracted from .iso",
-                                                                  os.path.join(get_current_dir(), "mbtool2"))
+                                                                  get_mbtool_dir())
         self.root_folder_label.setText(self._root_folder_path)
 
     def _add_to_replace_btn_clicked(self):
@@ -293,7 +313,11 @@ class MBTool(QMainWindow, MBToolUI):
         for selected_item in selected_items:
             self._replace_queue_list.takeItem(self._replace_queue_list.row(selected_item))
 
+    def _replace_stage_in_root(self, obj_filename, mtl_filename, config_filename, stage_id):
+        pass
     def _replace_btn_clicked(self):
+        # for i in range(self._replace_queue_list.count()):
+        #     obj_filename, mtl_filename, config_filename
         pass
 
     def _on_choose_stage(self):
@@ -346,12 +370,12 @@ class MBTool(QMainWindow, MBToolUI):
         error_message.exec_()
 
 
-def get_current_dir():
+def get_mbtool_dir():
     """
-    Get the current dir
+    Get the mbtool dir
     :return str: mbtool root dir
     """
-    return os.path.dirname(os.path.dirname(__file__))
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mbtool')
 
 
 if __name__ == "__main__":

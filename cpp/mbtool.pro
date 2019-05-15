@@ -18,5 +18,4 @@ SOURCES += main.cpp\
 HEADERS  += mbtool.h
 
 FORMS    += mbtool.ui \
-    choose_level.ui \
-    dialog.ui
+    choose_level.ui

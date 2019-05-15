@@ -315,6 +315,7 @@ class MBTool(QMainWindow, MBToolUI):
 
     def _replace_stage_in_root(self, obj_filename, mtl_filename, config_filename, stage_id):
         pass
+
     def _replace_btn_clicked(self):
         # for i in range(self._replace_queue_list.count()):
         #     obj_filename, mtl_filename, config_filename

@@ -6,6 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 import os
+import subprocess
 import sys
 
 from PyQt5 import QtCore
@@ -13,7 +14,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QFileDialog, QComboBox, QMessageBox, \
     QAbstractItemView, QDialogButtonBox, QLabel, QWidget, QPushButton, QListWidget, QProgressBar, QFrame, QFrame, \
     QProgressBar, QStatusBar
-
+import shutil
 
 class ChooseStagePopupUI:
     def __init__(self):
@@ -150,6 +151,7 @@ class MBToolUI:
         self._progress_bar = QProgressBar(self._central_widget)
         self._progress_bar.setGeometry(QtCore.QRect(0, 530, 581, 23))
         self._progress_bar.setProperty("value", 0)
+        self._progress_bar.setMaximum(0)
         self._progress_bar.setObjectName("progress_bar")
 
         self._line = QFrame(self._central_widget)
@@ -197,43 +199,59 @@ class MBTool(QMainWindow, MBToolUI):
         self._choose_stage_popup = ChooseStagePopup()
 
         self._input_filenames_key = QtCore.Qt.UserRole
-        self._output_stage_id_key = QtCore.Qt.DisplayRole
+        self._output_stage_id_key = QtCore.Qt.DecorationRole
         self._is_valid_input_key = QtCore.Qt.BackgroundRole
-        self._required_extensions = ["mtl", "obj", "xml"]
+
+        self._required_extensions = ["obj", "mtl", "xml"]
+        self._required_tools = ['GxModelViewer.exe', 'ws2lzfrontend.exe', 'SMB_LZ_Tool.exe']
+        self._tool_filepaths = self.find_required_tools()
         self._imported_obj_filepaths = []
         self._replace_queue = []
+        self._temp_dir = os.path.join(get_mbtool_dir(), 'temp')
+
+    def find_required_tools(self):
+        tool_filepaths = {}
+        [tool_filepaths.update({f: os.path.join(dp, f).replace('\\', '/')})
+         for dp, dn, filenames in os.walk(get_mbtool_dir())
+         for f in filenames if f in self._required_tools]
+
+        missing_tools = []
+        for tool_id in self._required_tools:
+            if tool_id not in tool_filepaths:
+                missing_tools.append(tool_id)
+                self._give_error_message("Cannot find tool: " + tool_id +
+                                         "\n\nPlease make sure the tool with this exact name is somewhere in the mbtool directory")
+
+        if missing_tools:
+            raise Exception("required tool(s) " + str(missing_tools) + " not found. "
+                            "please make sure these tools are somewhere in the mbtool dir")
+
+        return tool_filepaths
 
     # button callbacks:
     def _add_single_stage(self, obj_filepath):
-        has_ext = dict(zip(self._required_extensions, [False]*len(self._required_extensions)))
-
+        stage_directory = os.path.dirname(obj_filepath)
         stage_base_name = str(os.path.basename(obj_filepath).split(".")[0])
         required_filenames = [stage_base_name + "." + required_extension for required_extension in self._required_extensions]
-        stage_directory = os.path.dirname(obj_filepath)
 
-        collected_filenames = []
+        collected_filepaths = {}
         for filename in os.listdir(stage_directory):
             if filename in required_filenames:
-                collected_filenames.append(filename)
-                has_ext[filename.split(".")[-1]] = True
+                collected_filepaths[filename.split(".")[-1]] = os.path.join(stage_directory, filename).replace('\\', '/')
 
         item_string = stage_base_name + " | has: ["
         for required_extension in self._required_extensions:
-            if has_ext[required_extension]:
+            if required_extension in collected_filepaths.keys():
                 item_string += required_extension + ", "
         item_string = item_string[:-2] + "]"
 
-        collected_filepaths = []
-        for collected_filename in collected_filenames:
-            collected_filepaths.append(os.path.join(stage_directory, collected_filename))
+        all_inputs_met = len(collected_filepaths.keys()) == len(self._required_extensions)
 
         item = QListWidgetItem()
-        item.setData(self._input_filenames_key, ", ".join(collected_filepaths))
-        item.setData(self._is_valid_input_key, sum(has_ext.values()) == len(self._required_extensions))
+        item.setData(self._input_filenames_key, collected_filepaths)
+        item.setData(self._is_valid_input_key, all_inputs_met)
         item.setText(item_string)
-        item.setIcon(QIcon("resources/green_checkmark.png")
-                     if sum(has_ext.values()) == len(self._required_extensions)
-                     else QIcon("resources/red_xmark.png"))
+        item.setIcon(QIcon("resources/green_checkmark.png") if all_inputs_met else QIcon("resources/red_xmark.png"))
 
         self._imported_stages_list.addItem(item)
 
@@ -266,7 +284,7 @@ class MBTool(QMainWindow, MBToolUI):
         stages_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                               "import folder with multiple objs/mtls/configs",
                                                               get_mbtool_dir())
-        obj_filepaths = [os.path.join(dp, f)
+        obj_filepaths = [os.path.join(dp, f).replace('\\', '/')
                          for dp, dn, filenames in os.walk(stages_folder_path)
                          for f in filenames if os.path.splitext(f)[1] == '.obj']
 
@@ -289,6 +307,12 @@ class MBTool(QMainWindow, MBToolUI):
         self._root_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                                   "import root folder extracted from .iso",
                                                                   get_mbtool_dir())
+
+        if not os.path.exists(os.path.join(self._root_folder_path, 'stage')):
+            self._root_folder_path = None
+            self._give_error_message("root folder seems to be invalid, no 'stage' folder found")
+            return
+
         self.root_folder_label.setText(self._root_folder_path)
 
     def _add_to_replace_btn_clicked(self):
@@ -317,9 +341,66 @@ class MBTool(QMainWindow, MBToolUI):
         pass
 
     def _replace_btn_clicked(self):
-        # for i in range(self._replace_queue_list.count()):
-        #     obj_filename, mtl_filename, config_filename
-        pass
+        if self._root_folder_path is None:
+            self._give_error_message("Please import your monkeyball root folder created by gamecube rebuilder")
+            return
+
+        self._progress_bar.setMaximum(self._replace_queue_list.count())
+
+        for i in range(self._replace_queue_list.count()):
+            item = self._replace_queue_list.item(i)
+            input_filepaths = item.data(self._input_filenames_key)
+            obj_filepath, mtl_filepath, config_filepath = input_filepaths['obj'], input_filepaths['mtl'], input_filepaths['xml'].replace('/', '\\')
+
+            stage_id = item.data(self._output_stage_id_key)
+
+            base_filepath = os.path.splitext(obj_filepath)[0]
+            gma_filepath = base_filepath + ".gma"
+            tpl_filepath = base_filepath + ".tpl"
+            lz_raw_filepath = base_filepath + ".lz.raw"
+
+            # make gma and tpl
+            subprocess.call([self._tool_filepaths['GxModelViewer.exe'], obj_filepath])
+            if not os.path.exists(gma_filepath) or not os.path.exists(tpl_filepath):
+                error_message = "Failure to create gma and tpl files, ensure these files are correct, " \
+                                "as well as the GxModelViewer.exe (No GUI) tool"
+                self._give_error_message(error_message)
+                raise Exception(error_message)
+
+            # make .lz.raw
+            subprocess.call([self._tool_filepaths['ws2lzfrontend.exe'],
+                             '-c', config_filepath, '-o', lz_raw_filepath, "-g", '2'])
+
+            if not os.path.exists(lz_raw_filepath) :
+                error_message = "Failure to create .lz.raw file, ensure the config/obj/mtl files are valid, " \
+                                "as well as the ws2lzfrontend.exe tool"
+                self._give_error_message(error_message)
+                raise Exception(error_message)
+
+            # make .lz
+            lz_filepath = os.path.splitext(lz_raw_filepath)[0]
+            subprocess.call([self._tool_filepaths['SMB_LZ_Tool.exe'], lz_raw_filepath])
+
+            if not os.path.exists(lz_raw_filepath + '.lz'):
+                error_message = "Failure to create .lz.raw file, ensure the config/obj/mtl files are valid, " \
+                                "as well as the ws2lzfrontend.exe tool"
+                self._give_error_message(error_message)
+                raise Exception(error_message)
+
+            os.remove(lz_filepath)
+            os.rename(lz_raw_filepath + '.lz', lz_filepath)
+            os.remove(lz_raw_filepath)
+
+            stage_gma_filepath = os.path.join(self._root_folder_path, 'stage', 'st' + stage_id + '.gma').replace('\\', '/')
+            stage_tpl_filepath = os.path.join(self._root_folder_path, 'stage', 'st' + stage_id + '.tpl').replace('\\', '/')
+            stage_lz_filepath = os.path.join(self._root_folder_path, 'stage', 'STAGE' + stage_id + '.lz').replace('\\', '/')
+
+            shutil.copy(gma_filepath, stage_gma_filepath)
+            shutil.copy(tpl_filepath, stage_tpl_filepath)
+            shutil.copy(lz_filepath, stage_lz_filepath)
+
+            self.setStatusTip("written " + os.path.basename(base_filepath) + " to root")
+            self._progress_bar.setValue(i)
 
     def _on_choose_stage(self):
         if not self._choose_stage_popup.isActiveWindow():
@@ -351,11 +432,9 @@ class MBTool(QMainWindow, MBToolUI):
 
         self._choose_stage_popup.set_associated_stage(stage_index, replacement_stage_name)
 
-        input_filenames = selected_items[0].data(self._input_filenames_key).split(",")
-
         item = QListWidgetItem()
         item.setData(self._output_stage_id_key, self._choose_stage_popup.get_stage_id(stage_index))
-        item.setData(self._input_filenames_key, input_filenames)
+        item.setData(self._input_filenames_key, selected_items[0].data(self._input_filenames_key))
         item_text = replacement_stage_name + " -> " + self._choose_stage_popup.get_stage_name(stage_index)
         item.setText(item_text)
 

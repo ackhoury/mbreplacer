@@ -149,9 +149,9 @@ class MBToolUI:
         self._remove_from_replace_btn.setText("<-")
 
         self._progress_bar = QProgressBar(self._central_widget)
-        self._progress_bar.setGeometry(QtCore.QRect(0, 530, 581, 23))
-        self._progress_bar.setProperty("value", 0)
-        self._progress_bar.setMaximum(0)
+        self._progress_bar.setGeometry(QtCore.QRect(0, 530, 617, 23))
+        self._progress_bar.setValue(0)
+        self._progress_bar.setMaximum(100)
         self._progress_bar.setObjectName("progress_bar")
 
         self._line = QFrame(self._central_widget)
@@ -211,7 +211,7 @@ class MBTool(QMainWindow, MBToolUI):
 
     def find_required_tools(self):
         tool_filepaths = {}
-        [tool_filepaths.update({f: os.path.join(dp, f).replace('\\', '/')})
+        [tool_filepaths.update({f: os.path.join(dp, f)})
          for dp, dn, filenames in os.walk(get_mbtool_dir())
          for f in filenames if f in self._required_tools]
 
@@ -237,7 +237,7 @@ class MBTool(QMainWindow, MBToolUI):
         collected_filepaths = {}
         for filename in os.listdir(stage_directory):
             if filename in required_filenames:
-                collected_filepaths[filename.split(".")[-1]] = os.path.join(stage_directory, filename).replace('\\', '/')
+                collected_filepaths[filename.split(".")[-1]] = os.path.join(stage_directory, filename)
 
         item_string = stage_base_name + " | has: ["
         for required_extension in self._required_extensions:
@@ -284,7 +284,9 @@ class MBTool(QMainWindow, MBToolUI):
         stages_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                               "import folder with multiple objs/mtls/configs",
                                                               get_mbtool_dir())
-        obj_filepaths = [os.path.join(dp, f).replace('\\', '/')
+        stages_folder_path = QtCore.QDir.toNativeSeparators(stages_folder_path)
+
+        obj_filepaths = [os.path.join(dp, f)
                          for dp, dn, filenames in os.walk(stages_folder_path)
                          for f in filenames if os.path.splitext(f)[1] == '.obj']
 
@@ -307,6 +309,7 @@ class MBTool(QMainWindow, MBToolUI):
         self._root_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                                   "import root folder extracted from .iso",
                                                                   get_mbtool_dir())
+        self._root_folder_path = QtCore.QDir.toNativeSeparators(self._root_folder_path)
 
         if not os.path.exists(os.path.join(self._root_folder_path, 'stage')):
             self._root_folder_path = None
@@ -337,70 +340,73 @@ class MBTool(QMainWindow, MBToolUI):
         for selected_item in selected_items:
             self._replace_queue_list.takeItem(self._replace_queue_list.row(selected_item))
 
-    def _replace_stage_in_root(self, obj_filename, mtl_filename, config_filename, stage_id):
-        pass
+    def _replace_stage_in_root(self, obj_filepath, config_filepath, stage_id):
+        base_filepath = os.path.splitext(obj_filepath)[0]
+        gma_filepath = base_filepath + ".gma"
+        tpl_filepath = base_filepath + ".tpl"
+        lz_raw_filepath = base_filepath + ".lz.raw"
+
+        # make gma and tpl in another thread while we do other things
+        gx_process = subprocess.Popen([self._tool_filepaths['GxModelViewer.exe'], obj_filepath])
+
+        # make .lz.raw
+        subprocess.call([self._tool_filepaths['ws2lzfrontend.exe'],
+                         '-c', config_filepath, '-o', lz_raw_filepath, "-g", '2'])
+
+        if not os.path.exists(lz_raw_filepath):
+            error_message = "Failure to create .lz.raw file, ensure the config/obj/mtl files are valid, " \
+                            "as well as the ws2lzfrontend.exe tool"
+            self._give_error_message(error_message)
+            raise Exception(error_message)
+
+        # make .lz
+        lz_filepath = os.path.splitext(lz_raw_filepath)[0]
+        subprocess.call([self._tool_filepaths['SMB_LZ_Tool.exe'], lz_raw_filepath])
+
+        if not os.path.exists(lz_raw_filepath + '.lz'):
+            error_message = "Failure to create .lz.raw file, ensure the config/obj/mtl files are valid, " \
+                            "as well as the ws2lzfrontend.exe tool"
+            self._give_error_message(error_message)
+            raise Exception(error_message)
+
+        os.remove(lz_filepath)
+        os.rename(lz_raw_filepath + '.lz', lz_filepath)
+        os.remove(lz_raw_filepath)
+
+        # wait for the gx process to finish
+        gx_process.wait()
+        if not os.path.exists(gma_filepath) or not os.path.exists(tpl_filepath):
+            error_message = "Failure to create gma and tpl files, ensure these files are correct, " \
+                            "as well as the GxModelViewer.exe (No GUI) tool"
+            self._give_error_message(error_message)
+            raise Exception(error_message)
+
+        stage_gma_filepath = os.path.join(self._root_folder_path, 'stage', 'st' + stage_id + '.gma')
+        stage_tpl_filepath = os.path.join(self._root_folder_path, 'stage', 'st' + stage_id + '.tpl')
+        stage_lz_filepath = os.path.join(self._root_folder_path, 'stage', 'STAGE' + stage_id + '.lz')
+
+        shutil.copy(gma_filepath, stage_gma_filepath)
+        shutil.copy(tpl_filepath, stage_tpl_filepath)
+        shutil.copy(lz_filepath, stage_lz_filepath)
 
     def _replace_btn_clicked(self):
         if self._root_folder_path is None:
             self._give_error_message("Please import your monkeyball root folder created by gamecube rebuilder")
             return
 
-        self._progress_bar.setMaximum(self._replace_queue_list.count())
+        self._progress_bar.setMaximum(100)
+        self._progress_bar.setValue(50)
 
         for i in range(self._replace_queue_list.count()):
             item = self._replace_queue_list.item(i)
             input_filepaths = item.data(self._input_filenames_key)
-            obj_filepath, mtl_filepath, config_filepath = input_filepaths['obj'], input_filepaths['mtl'], input_filepaths['xml'].replace('/', '\\')
-
+            obj_filepath, config_filepath = input_filepaths['obj'], input_filepaths['xml']
             stage_id = item.data(self._output_stage_id_key)
 
-            base_filepath = os.path.splitext(obj_filepath)[0]
-            gma_filepath = base_filepath + ".gma"
-            tpl_filepath = base_filepath + ".tpl"
-            lz_raw_filepath = base_filepath + ".lz.raw"
+            self._replace_stage_in_root(obj_filepath, config_filepath, stage_id)
 
-            # make gma and tpl
-            subprocess.call([self._tool_filepaths['GxModelViewer.exe'], obj_filepath])
-            if not os.path.exists(gma_filepath) or not os.path.exists(tpl_filepath):
-                error_message = "Failure to create gma and tpl files, ensure these files are correct, " \
-                                "as well as the GxModelViewer.exe (No GUI) tool"
-                self._give_error_message(error_message)
-                raise Exception(error_message)
-
-            # make .lz.raw
-            subprocess.call([self._tool_filepaths['ws2lzfrontend.exe'],
-                             '-c', config_filepath, '-o', lz_raw_filepath, "-g", '2'])
-
-            if not os.path.exists(lz_raw_filepath) :
-                error_message = "Failure to create .lz.raw file, ensure the config/obj/mtl files are valid, " \
-                                "as well as the ws2lzfrontend.exe tool"
-                self._give_error_message(error_message)
-                raise Exception(error_message)
-
-            # make .lz
-            lz_filepath = os.path.splitext(lz_raw_filepath)[0]
-            subprocess.call([self._tool_filepaths['SMB_LZ_Tool.exe'], lz_raw_filepath])
-
-            if not os.path.exists(lz_raw_filepath + '.lz'):
-                error_message = "Failure to create .lz.raw file, ensure the config/obj/mtl files are valid, " \
-                                "as well as the ws2lzfrontend.exe tool"
-                self._give_error_message(error_message)
-                raise Exception(error_message)
-
-            os.remove(lz_filepath)
-            os.rename(lz_raw_filepath + '.lz', lz_filepath)
-            os.remove(lz_raw_filepath)
-
-            stage_gma_filepath = os.path.join(self._root_folder_path, 'stage', 'st' + stage_id + '.gma').replace('\\', '/')
-            stage_tpl_filepath = os.path.join(self._root_folder_path, 'stage', 'st' + stage_id + '.tpl').replace('\\', '/')
-            stage_lz_filepath = os.path.join(self._root_folder_path, 'stage', 'STAGE' + stage_id + '.lz').replace('\\', '/')
-
-            shutil.copy(gma_filepath, stage_gma_filepath)
-            shutil.copy(tpl_filepath, stage_tpl_filepath)
-            shutil.copy(lz_filepath, stage_lz_filepath)
-
-            self.setStatusTip("written " + os.path.basename(base_filepath) + " to root")
-            self._progress_bar.setValue(i)
+            self.setStatusTip("written " + os.path.basename(os.path.splitext(obj_filepath)[0]) + " to root")
+            self._progress_bar.setValue(100)
 
     def _on_choose_stage(self):
         if not self._choose_stage_popup.isActiveWindow():

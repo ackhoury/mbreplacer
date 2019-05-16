@@ -37,9 +37,9 @@ Your executable will be found in the generated `build/` folder
 
 ## Runtime Dependencies
 MBtool requires:
-- `SMB_LZ_Tool.exe`: ![SMB LZ Compression tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
-- `GxModelViewer.exe`: ![GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
-- `ws2lzfrontend.exe`: ![SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
+- `SMB_LZ_Tool.exe`: [SMB LZ Compression tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
+- `GxModelViewer.exe`: [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
+- `ws2lzfrontend.exe`: [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
 
 Please put the executables for these tools somewhere in the mbtool directory. 
 mbtool will automatically find and import them
@@ -47,9 +47,9 @@ mbtool will automatically find and import them
 ## Pre-steps
 1. Create your stage in some 3d modeling software like Blender or Wings3D
 2. Export stage as .obj file (will also export a needed .mtl)
-2.1 Note if you are using the ![BlendToSMBStage](https://gitlab.com/CraftedCart/BlendToSMBStage) 
+2.1 Note if you are using the [BlendToSMBStage](https://gitlab.com/CraftedCart/BlendToSMBStage) 
 then you will need to export the config (.xml) file, and skip step 3.
-3. Use ![SMB Level Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1) to create a .lz.raw
+3. Use [SMB Level Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1) to create a .lz.raw
 for your stage.
 
 _The mbtool will take in an .obj, .mtl, and any of (.xml, .lz.raw, .lz) as valid inputs
@@ -83,7 +83,7 @@ it wont be picky how you organize your files.
 
 ## Using mbtool
 
-1. import the root folder exported from ![gamecube rebuilder](https://www.romhacking.net/utilities/619/)
+1. import the root folder exported from [gamecube rebuilder](https://www.romhacking.net/utilities/619/)
 2. import the stages using the `+` button to import a single stage, 
 or `import stages folder` button to recursively import all stages within a directory (it looks for .obj files)
 3. select the stage you wish to use in the list on the left, then click the `>>` button to add it the the queue for replacement.
@@ -95,7 +95,7 @@ Note that if multiple stages are selected, and the `>>` button is pressed, it wi
 the first stage in the list, and populate the rest sequentially after this.
 
 ## Post-steps
-After you have done this, you should be able to open the root in ![gamecube rebuilder](https://www.romhacking.net/utilities/619/)
+After you have done this, you should be able to open the root in [gamecube rebuilder](https://www.romhacking.net/utilities/619/)
 and save and rebuild the iso, and play it!
 
 Happy MB hacking!

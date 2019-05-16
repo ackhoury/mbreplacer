@@ -74,7 +74,6 @@ stages_folder/
         stage3.obj
         stage3.mtl
         stage3.lz
-
 ```
 as long as all the supporting files are in the same directory as the obj, 
 it wont be picky how you organize your files.

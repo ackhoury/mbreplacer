@@ -37,9 +37,9 @@ Your executable will be found in the generated `build/` folder
 
 ## Runtime Dependencies
 MBtool requires:
-- `SMB_LZ_Tool.exe`: [SMB LZ Compression tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
-- `GxModelViewer.exe`: [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
-- `ws2lzfrontend.exe`: [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
+- BobJrSenior's `SMB_LZ_Tool.exe`: [SMB LZ Compression tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
+- BobJrSenior's `GxModelViewer.exe`: [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
+- CraftedCart's `ws2lzfrontend.exe`: [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
 
 Please put the executables for these tools somewhere in the mbtool directory. 
 mbtool will automatically find and import them

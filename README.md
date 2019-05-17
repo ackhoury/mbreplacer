@@ -11,7 +11,7 @@ The inputs and usage of this tool in the entire process is as follows:
 Should work on any python enabled OS. 
 
 Normal users can just download mbtool executable for their OS here:
-<insert download link here>
+https://github.com/ackhoury/mbtool/releases
 
 ### Cool people
 python3.5 dependencies: `PyQt5==5.12.2, cx_Freeze==5.1.1`

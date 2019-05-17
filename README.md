@@ -7,7 +7,7 @@ The inputs and usage of this tool in the entire process is as follows:
 ![usage_diagram](mbtool_diagram.png)
 
 ## Installation
-### Normal people - just download and run
+### Normal people - download and run
 Should work on any python enabled OS. 
 
 Normal people can just download mbtool executable for their OS here:
@@ -27,7 +27,7 @@ python3 mbtool.py
 ### Even Cooler people - build from scratch
 python3.5 dependencies: `PyQt5==5.12.2, cx_Freeze==5.1.1`
 ```bash
-sudo pip3 install PyQt5==5.12.2, cx_Freeze==5.1.1
+sudo pip3 install PyQt5==5.12.2 cx_Freeze==5.1.1
 ```
 You can build the executable for your OS using:
 ```bash
@@ -37,7 +37,7 @@ Your executable will be found in the generated `build/` folder
 
 ## Runtime Dependencies
 MBtool requires:
-- BobJrSenior's `SMB_LZ_Tool.exe`: [SMB LZ Compression tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
+- BobJrSenior's `SMB_LZ_Tool.exe`: [SMB LZ Tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
 - BobJrSenior's `GxModelViewer.exe`: [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
 - CraftedCart's `ws2lzfrontend.exe`: [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
 

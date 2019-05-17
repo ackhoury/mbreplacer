@@ -1,4 +1,3 @@
-import time
 import os
 import sys
 import shutil
@@ -8,8 +7,7 @@ from enum import Enum
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QFileDialog, QComboBox, QMessageBox, \
-    QAbstractItemView, QDialogButtonBox, QLabel, QWidget, QPushButton, QListWidget, QFrame, QProgressBar, QStatusBar, \
-    QSizePolicy
+    QAbstractItemView, QDialogButtonBox, QLabel, QWidget, QPushButton, QListWidget, QFrame, QProgressBar, QStatusBar
 
 
 class Status(Enum):
@@ -444,7 +442,7 @@ class MBTool(QMainWindow, MBToolUI):
 
         return Status.OK
 
-    def _replace_btn_clicked(self, mock_replace=True):
+    def _replace_btn_clicked(self):
         if self._root_folder_path is None:
             self._give_error_message("Please import your monkeyball root folder created by gamecube rebuilder")
             return
@@ -460,11 +458,7 @@ class MBTool(QMainWindow, MBToolUI):
             config_filepath = [value for key, value in input_filepaths.items() if key != 'obj' and key != 'mtl'][0]
 
             stage_id = item.data(self._output_stage_id_key)
-            if mock_replace:
-                time.sleep(0.25)
-                status = Status.OK
-            else:
-                status = self._replace_stage_in_root(obj_filepath, config_filepath, stage_id)
+            status = self._replace_stage_in_root(obj_filepath, config_filepath, stage_id)
 
             if status in (Status.WARN, Status.FAIL):
                 self._progress_bar.setValue(0)
@@ -512,7 +506,7 @@ class MBTool(QMainWindow, MBToolUI):
             self._replace_queue.append((replacement_stage_name, stage_index))
             self._choose_stage_popup.increment_stage_index()
 
-            return Status.OK
+        return Status.OK
 
     def _give_error_message(self, message, raise_exception=False):
         error_message = QMessageBox()

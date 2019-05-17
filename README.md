@@ -1,5 +1,5 @@
 # mbtool
-This is a tool meant for speeding up the process of using multiple people`s tools
+This is a tool meant for speeding up the process of using multiple people's tools
 for importing custom monkeyball stages into the game.
 
 The inputs and usage of this tool in the entire process is as follows:
@@ -10,7 +10,7 @@ The inputs and usage of this tool in the entire process is as follows:
 ### Normal people
 Should work on any python enabled OS. 
 
-Normal users can just download mbtool executable for their OS here:
+Normal people can just download mbtool executable for their OS here:
 https://github.com/ackhoury/mbtool/releases
 
 ### Cool people

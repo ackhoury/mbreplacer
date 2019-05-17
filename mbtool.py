@@ -1,9 +1,9 @@
 import os
-import sys
 import shutil
 import subprocess
-
+import sys
 from enum import Enum
+
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QFileDialog, QComboBox, QMessageBox, \
@@ -14,6 +14,35 @@ class Status(Enum):
     OK = 0
     WARN = 1
     FAIL = 2
+
+
+def get_qt_data_keys(num_keys):
+    assert num_keys <= 255 and "too many keys queried"
+    possible_keys = range(256)
+    used_keys = list(map(int, [QtCore.Qt.CheckStateRole,
+                               QtCore.Qt.DecorationRole,
+                               QtCore.Qt.AccessibleDescriptionRole,
+                               QtCore.Qt.AccessibleTextRole,
+                               QtCore.Qt.BackgroundColorRole,
+                               QtCore.Qt.BackgroundRole,
+                               QtCore.Qt.DisplayRole,
+                               QtCore.Qt.EditRole,
+                               QtCore.Qt.FontRole,
+                               QtCore.Qt.ForegroundRole,
+                               QtCore.Qt.InitialSortOrderRole,
+                               QtCore.Qt.SizeHintRole,
+                               QtCore.Qt.StatusTipRole,
+                               QtCore.Qt.TextAlignmentRole,
+                               QtCore.Qt.TextColorRole,
+                               QtCore.Qt.ToolTipRole,
+                               QtCore.Qt.UserRole,
+                               QtCore.Qt.WhatsThisRole]))
+    c, keys = 0, []
+    for key in possible_keys:
+        if c < num_keys and key not in used_keys:
+            keys.append(key)
+            c += 1
+    return keys
 
 
 class ChooseStagePopupUI:
@@ -106,7 +135,7 @@ class MBToolUI:
 
     def _setup_ui(self, mbtool):
         mbtool.setObjectName("mbtool")
-        mbtool.resize(961, 575)
+        mbtool.resize(961, 545)
 
         self._central_widget = QWidget(mbtool)
         self._central_widget.setObjectName("centralWidget")
@@ -156,12 +185,6 @@ class MBToolUI:
         self._remove_from_replace_btn.setObjectName("remove_from_replace_btn")
         self._remove_from_replace_btn.setText("<-")
 
-        self._progress_bar = QProgressBar(self._central_widget)
-        self._progress_bar.setGeometry(QtCore.QRect(0, 530, 961, 23))
-        self._progress_bar.setValue(0)
-        self._progress_bar.setMaximum(100)
-        self._progress_bar.setObjectName("progress_bar")
-
         self._line = QFrame(self._central_widget)
         self._line.setGeometry(QtCore.QRect(0, 40, 961, 20))
         self._line.setFrameShape(QFrame.HLine)
@@ -184,11 +207,11 @@ class MBToolUI:
         
         mbtool.setCentralWidget(self._central_widget)
 
-        self._status_bar = QStatusBar(mbtool)
-        self._status_bar.setObjectName("statusBar")
-        mbtool.setStatusBar(self._status_bar)
+        self._status_bar_label = QLabel(self._central_widget)
+        self._status_bar_label.setGeometry(QtCore.QRect(5, 525, 961, 24))
+        self._status_bar_label.setObjectName("status_bar_label")
 
-        mbtool.setWindowTitle("mbtool")
+        mbtool.setWindowTitle("mbtool: stage replacer")
 
 
 class MBTool(QMainWindow, MBToolUI):
@@ -210,10 +233,7 @@ class MBTool(QMainWindow, MBToolUI):
         self._stages_to_be_replaced = []
         self._choose_stage_popup = ChooseStagePopup()
 
-        self._input_filenames_key = QtCore.Qt.UserRole
-        self._output_stage_id_key = QtCore.Qt.DecorationRole
-        self._is_valid_input_key = QtCore.Qt.BackgroundRole
-
+        self._input_filenames_key, self._output_stage_id_key, self._is_valid_input_key = get_qt_data_keys(3)
         # the tuple allows for replacement files for the given element. obj and mtl are required and have no replacement
         # but for config we can take xml lz or lz.raw. let the order of the tuple denote priority (we want xml over all)
         self._required_extensions = [("obj",), ("mtl",), ("xml", "lz", "lz.raw")]
@@ -232,7 +252,7 @@ class MBTool(QMainWindow, MBToolUI):
         return tool_filepaths
 
     # button callbacks:
-    def _add_single_stage(self, obj_filepath, show_counts=True):
+    def _add_single_stage(self, obj_filepath):
         import_stage_directory = os.path.dirname(obj_filepath)
         import_stage_base_name = str(os.path.basename(obj_filepath).split(".")[0])
         all_filenames = os.listdir(import_stage_directory)
@@ -248,16 +268,31 @@ class MBTool(QMainWindow, MBToolUI):
                     break
         item_string = item_string[:-2] + "]"
 
-        if show_counts:
-            with open(obj_filepath) as f:
-                obj_lines = f.readlines()
+        all_textures_present = False
+        if 'mtl' in collected_filepaths:
+            with open(collected_filepaths['mtl'], 'r') as f:
+                required_textures = []
+                for line in f:
+                    split_line = line.strip().split()
+                    if split_line and split_line[0] == 'map_Kd':
+                        if os.path.isabs(split_line[1]):
+                            required_textures.append(split_line[1])
+                        else:
+                            required_textures.append(os.path.join(import_stage_directory, split_line[1]))
 
-            num_vertices = len([line for line in obj_lines if line.startswith('v ')])
-            num_faces = len([line for line in obj_lines if line.startswith('f ')])
+            all_textures_present = all([os.path.exists(texture) for texture in required_textures])
 
-            item_string += " | v:" + str(num_vertices) + " f: " + str(num_faces)
+        item_string += " | textures: " + ("yes" if all_textures_present else "no")
 
-        all_inputs_met = len(collected_filepaths.keys()) == len(self._required_extensions)
+        with open(obj_filepath, 'r') as f:
+            obj_lines = f.readlines()
+
+        num_vertices = len([line for line in obj_lines if line.startswith('v ')])
+        num_faces = len([line for line in obj_lines if line.startswith('f ')])
+
+        item_string += " | v:" + str(num_vertices) + " f: " + str(num_faces)
+
+        all_inputs_met = len(collected_filepaths.keys()) == len(self._required_extensions) and all_textures_present
 
         item = QListWidgetItem()
         item.setData(self._input_filenames_key, collected_filepaths)
@@ -346,9 +381,12 @@ class MBTool(QMainWindow, MBToolUI):
         elif not all([selected_item.data(self._is_valid_input_key) for selected_item in selected_items]):
             required = [', or '.join(required_extension) for required_extension in self._required_extensions]
             self._give_error_message("Could not find all required files for one of the selected stages!\n"
-                                     "Required Extensions: " + str(required) + "\n\n"
                                      "Please sure the required files are in the same directory as the .obj,\n"
-                                     "then reimport the stage!")
+                                     "then reimport the stage!\n\n"
+                                     "Required Extensions: " + str(required) + "\n\n"
+                                     "Also requires that all linked textures are found. "
+                                     "(open the mtl file as txt to see the texture paths)\n\n"
+                                     )
             return Status.WARN
         else:
             self._choose_stage_popup.setWindowModality(QtCore.Qt.WindowModal)
@@ -450,8 +488,6 @@ class MBTool(QMainWindow, MBToolUI):
 
         self._tool_filepaths = self._find_required_tools()
 
-        self._progress_bar.setMaximum(100)
-        progress_increment = 100 / self._replace_queue_list.count()
         for i in range(self._replace_queue_list.count()):
             item = self._replace_queue_list.item(i)
             input_filepaths = item.data(self._input_filenames_key)
@@ -462,13 +498,12 @@ class MBTool(QMainWindow, MBToolUI):
             status = self._replace_stage_in_root(obj_filepath, config_filepath, stage_id)
 
             if status in (Status.WARN, Status.FAIL):
-                self._progress_bar.setValue(0)
+                item.setIcon(QIcon("resources/red_xmark.png"))
                 return status
 
-            self._status_bar.setStatusTip("written " + os.path.basename(os.path.splitext(obj_filepath)[0]) + " to root")
-            self._progress_bar.setValue(int((i + 1) * progress_increment))
+            item.setIcon(QIcon("resources/green_checkmark.png"))
+            self._status_bar_label.setText("written " + os.path.basename(os.path.splitext(obj_filepath)[0]) + " to root")
 
-        self._progress_bar.setValue(0)
         return Status.OK
 
     def _on_choose_stage(self):
@@ -503,6 +538,7 @@ class MBTool(QMainWindow, MBToolUI):
             item.setData(self._input_filenames_key, selected_item.data(self._input_filenames_key))
             item_text = replacement_stage_name + " -> " + self._choose_stage_popup.get_stage_name(stage_index)
             item.setText(item_text)
+            item.setIcon(QIcon("resources/gray_dot.png"))
 
             self._replace_queue_list.addItem(item)
             self._replace_queue.append((replacement_stage_name, stage_index))

@@ -372,7 +372,7 @@ class MBTool(QMainWindow, MBToolUI):
         lz_filepath = os.path.splitext(lz_raw_filepath)[0]
 
         needs_lz_raw_creation = config_ext == ".xml"
-        needs_lz_compression = config_ext == ".xml" or config_ext == ".lz.raw"
+        needs_lz_compression = config_ext == ".xml" or config_ext == ".raw"
 
         if not needs_lz_compression and not needs_lz_raw_creation and not os.path.exists(lz_filepath):
             self._give_error_message(".lz file promised not found")
@@ -421,7 +421,8 @@ class MBTool(QMainWindow, MBToolUI):
             return Status.WARN
 
         if needs_lz_compression:
-            os.remove(lz_filepath)
+            if os.path.exists(lz_filepath):
+                os.remove(lz_filepath)
             os.rename(lz_raw_filepath + '.lz', lz_filepath)
             os.remove(lz_raw_filepath)
 
@@ -467,6 +468,7 @@ class MBTool(QMainWindow, MBToolUI):
             self._status_bar.setStatusTip("written " + os.path.basename(os.path.splitext(obj_filepath)[0]) + " to root")
             self._progress_bar.setValue(int((i + 1) * progress_increment))
 
+        self._progress_bar.setValue(0)
         return Status.OK
 
     def _on_choose_stage(self):

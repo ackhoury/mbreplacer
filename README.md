@@ -7,24 +7,24 @@ The inputs and usage of this tool in the entire process is as follows:
 ![usage_diagram](mbtool_diagram.png)
 
 ## Installation
-### Normal people
+### Normal people - just download and run
 Should work on any python enabled OS. 
 
 Normal people can just download mbtool executable for their OS here:
 https://github.com/ackhoury/mbtool/releases
 
-### Cool people
-python3.5 dependencies: `PyQt5==5.12.2, cx_Freeze==5.1.1`
+### Cool people - run with python3
+python3.5 dependencies: `PyQt5==5.12.2
 ```bash
-sudo pip3 install PyQt5==5.12.2, cx_Freeze==5.1.1
+sudo pip3 install PyQt5==5.12.2
 ```
 
-Then you can just straight run the mbtool.py
+Then you can just straight run mbtool.py
 ```bash
 python3 mbtool.py
 ```
 
-### Even Cooler people
+### Even Cooler people - build from scratch
 python3.5 dependencies: `PyQt5==5.12.2, cx_Freeze==5.1.1`
 ```bash
 sudo pip3 install PyQt5==5.12.2, cx_Freeze==5.1.1

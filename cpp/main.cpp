@@ -1,10 +1,10 @@
-#include "mbtool.h"
+#include "mbreplacer.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    mbtool w;
+    mbreplacer w;
     w.show();
 
     return a.exec();

@@ -1,17 +1,17 @@
-# mbtool
+# mbreplacer
 This is a tool meant for speeding up the process of using multiple people's tools
 for importing custom monkeyball stages into the game.
 
 The inputs and usage of this tool in the entire process is as follows:
 
-![usage_diagram](mbtool_diagram.png)
+![usage_diagram](mbreplacer_diagram.png)
 
 ## Installation
 ### Normal people - download and run
 Should work on any python enabled OS. 
 
-Normal people can just download mbtool executable for their OS here:
-https://github.com/ackhoury/mbtool/releases
+Normal people can just download mbreplacer executable for their OS here:
+https://github.com/ackhoury/mbreplacer/releases
 
 ### Cool people - run with python3
 python3.5 dependencies: `PyQt5==5.12.2
@@ -19,9 +19,9 @@ python3.5 dependencies: `PyQt5==5.12.2
 sudo pip3 install PyQt5==5.12.2
 ```
 
-Then you can just straight run mbtool.py
+Then you can just straight run mbreplacer.py
 ```bash
-python3 mbtool.py
+python3 mbreplacer.py
 ```
 
 ### Even Cooler people - build from scratch
@@ -36,13 +36,13 @@ python3 setup.py build
 Your executable will be found in the generated `build/` folder
 
 ## Runtime Dependencies
-MBtool requires:
+mbreplacer requires:
 - BobJrSenior's `SMB_LZ_Tool.exe`: [SMB LZ Tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
 - BobJrSenior's `GxModelViewer.exe`: [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
 - CraftedCart's `ws2lzfrontend.exe`: [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
 
-Please put the executables for these tools somewhere in the mbtool directory. 
-mbtool will automatically find and import them
+Please put the executables for these tools somewhere in the mbreplacer directory. 
+mbreplacer will automatically find and import them
 
 ## Pre-steps
 1. Create your stage in some 3d modeling software like Blender or Wings3D
@@ -52,12 +52,12 @@ then you will need to export the config (.xml) file, and skip step 3.
 3. Use [SMB Level Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1) to create a .lz.raw
 for your stage.
 
-_The mbtool will take in an .obj, .mtl, and any of (.xml, .lz.raw, .lz) as valid inputs
+_The mbreplacer will take in an .obj, .mtl, and any of (.xml, .lz.raw, .lz) as valid inputs
 for replacing a stage._
 
-**mbtool: (.obj, .mtl, (.xml, .lz.raw, .lz)) -> (.gma, .tpl, .lz)**
+**mbreplacer: (.obj, .mtl, (.xml, .lz.raw, .lz)) -> (.gma, .tpl, .lz)**
 
-mbtool will look in the same directory as the .obj file for the other associated files. It will assume all files have the same name:
+mbreplacer will look in the same directory as the .obj file for the other associated files. It will assume all files have the same name:
 
 an example organization for your stages:
 ```
@@ -78,9 +78,9 @@ stages_folder/
 as long as all the supporting files are in the same directory as the obj, 
 it wont be picky how you organize your files.
 
-**Once you have this, you can use mbtool!**
+**Once you have this, you can use mbreplacer!**
 
-## Using mbtool
+## Using mbreplacer
 
 1. import the root folder exported from [gamecube rebuilder](https://www.romhacking.net/utilities/619/)
 2. import the stages using the `+` button to import a single stage, 

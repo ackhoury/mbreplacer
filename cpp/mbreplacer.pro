@@ -8,14 +8,16 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = mbtool
+TARGET = mbreplacer
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mbtool.cpp
+SOURCES += main.cpp \
+    replacer.cpp
 
-HEADERS  += mbtool.h
+HEADERS  += \
+    mbreplacer.h
 
-FORMS    += mbtool.ui \
-    choose_level.ui
+FORMS    += \
+    choose_level.ui \
+    mbreplacer.ui

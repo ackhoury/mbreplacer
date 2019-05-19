@@ -75,7 +75,7 @@ class ChooseStagePopupUI:
         choose_stage_popup.setWindowTitle("Choose Stage to Replace")
 
     def _load_stages(self):
-        with open(os.path.join(get_mbtool_dir(), 'resources', 'challenge_stages_list.txt'), 'r') as f:
+        with open(os.path.join(get_mbreplacer_dir(), 'resources', 'challenge_stages_list.txt'), 'r') as f:
             for line in f:
                 clean_line = line.strip()
                 self._stage_select_combobox.addItem(clean_line)
@@ -115,7 +115,7 @@ class ChooseStagePopup(QMainWindow, ChooseStagePopupUI):
         self._stage_select_combobox.setCurrentIndex(current_idx)
 
 
-class MBToolUI:
+class MBReplacerUI:
     def __init__(self):
         self._central_widget = None  # type: QWidget
         self._import_multiple_stages_btn = None  # type: QPushButton
@@ -133,11 +133,11 @@ class MBToolUI:
         self._remove_single_stage_btn = None  # type: QPushButton
         self._status_bar = None  # type: QStatusBar
 
-    def _setup_ui(self, mbtool):
-        mbtool.setObjectName("mbtool")
-        mbtool.resize(961, 545)
+    def _setup_ui(self, mbreplacer):
+        mbreplacer.setObjectName("mbreplacer")
+        mbreplacer.resize(961, 545)
 
-        self._central_widget = QWidget(mbtool)
+        self._central_widget = QWidget(mbreplacer)
         self._central_widget.setObjectName("centralWidget")
 
         self._import_multiple_stages_btn = QPushButton(self._central_widget)
@@ -204,20 +204,20 @@ class MBToolUI:
         self._root_folder_label = QLabel(self._central_widget)
         self._root_folder_label.setGeometry(QtCore.QRect(220, 16, 341, 21))
         self._root_folder_label.setObjectName("root_folder_label")
-        
-        mbtool.setCentralWidget(self._central_widget)
+
+        mbreplacer.setCentralWidget(self._central_widget)
 
         self._status_bar_label = QLabel(self._central_widget)
         self._status_bar_label.setGeometry(QtCore.QRect(5, 525, 961, 24))
         self._status_bar_label.setObjectName("status_bar_label")
 
-        mbtool.setWindowTitle("mbtool: stage replacer")
+        mbreplacer.setWindowTitle("mbreplacer: stage replacer")
 
 
-class MBTool(QMainWindow, MBToolUI):
+class MBReplacer(QMainWindow, MBReplacerUI):
     def __init__(self):
         QMainWindow.__init__(self)
-        MBToolUI.__init__(self)
+        MBReplacerUI.__init__(self)
         self._setup_ui(self)
 
         self._import_multiple_stages_btn.clicked.connect(self._import_multiple_stages_btn_clicked)
@@ -241,12 +241,12 @@ class MBTool(QMainWindow, MBToolUI):
         self._tool_filepaths = self._find_required_tools()
         self._imported_obj_filepaths = []
         self._replace_queue = []
-        self._temp_dir = os.path.join(get_mbtool_dir(), 'temp')
+        self._temp_dir = os.path.join(get_mbreplacer_dir(), 'temp')
 
     def _find_required_tools(self):
         tool_filepaths = {}
         [tool_filepaths.update({f: os.path.join(dp, f)})
-         for dp, dn, filenames in os.walk(get_mbtool_dir())
+         for dp, dn, filenames in os.walk(get_mbreplacer_dir())
          for f in filenames if f in self._required_tools]
 
         return tool_filepaths
@@ -308,7 +308,7 @@ class MBTool(QMainWindow, MBToolUI):
         file_dialog = QFileDialog()
         obj_filepath = QFileDialog.getOpenFileName(file_dialog,
                                                    "import stage .obj file",
-                                                   get_mbtool_dir(),
+                                                   get_mbreplacer_dir(),
                                                    "*.obj")[0]
 
         if obj_filepath in self._imported_obj_filepaths:
@@ -336,7 +336,7 @@ class MBTool(QMainWindow, MBToolUI):
         file_dialog.setParent(self.sender())
         stages_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                               "import folder with multiple objs/mtls/configs",
-                                                              get_mbtool_dir())
+                                                              get_mbreplacer_dir())
         stages_folder_path = QtCore.QDir.toNativeSeparators(stages_folder_path)
 
         obj_filepaths = [os.path.join(dp, f)
@@ -363,7 +363,7 @@ class MBTool(QMainWindow, MBToolUI):
         file_dialog.setParent(self.sender())
         self._root_folder_path = QFileDialog.getExistingDirectory(file_dialog,
                                                                   "import root folder extracted from .iso",
-                                                                  get_mbtool_dir())
+                                                                  get_mbreplacer_dir())
         self._root_folder_path = QtCore.QDir.toNativeSeparators(self._root_folder_path)
 
         if not os.path.exists(os.path.join(self._root_folder_path, 'stage')):
@@ -420,7 +420,7 @@ class MBTool(QMainWindow, MBToolUI):
         if tool_id not in self._tool_filepaths:
             self._give_error_message("Cannot find tool: " + tool_id +
                                      "\n\nPlease make sure the tool with this exact name "
-                                     "is somewhere in the mbtool directory")
+                                     "is somewhere in the mbreplacer directory")
             return Status.WARN
 
         # make gma and tpl in another thread while we do other things
@@ -432,7 +432,7 @@ class MBTool(QMainWindow, MBToolUI):
             if tool_id not in self._tool_filepaths:
                 self._give_error_message("Cannot find tool: " + tool_id +
                                          "\n\nPlease make sure the tool with this exact name "
-                                         "is somewhere in the mbtool directory")
+                                         "is somewhere in the mbreplacer directory")
                 return Status.WARN
 
             subprocess.call([self._tool_filepaths[tool_id], '-c', config_filepath, '-o', lz_raw_filepath, "-g", '2'])
@@ -448,7 +448,7 @@ class MBTool(QMainWindow, MBToolUI):
             if tool_id not in self._tool_filepaths:
                 self._give_error_message("Cannot find tool: " + tool_id +
                                          "\n\nPlease make sure the tool with this exact name "
-                                         "is somewhere in the mbtool directory")
+                                         "is somewhere in the mbreplacer directory")
                 return
 
             subprocess.call([self._tool_filepaths[tool_id], lz_raw_filepath])
@@ -557,16 +557,16 @@ class MBTool(QMainWindow, MBToolUI):
             raise Exception(message)
 
 
-def get_mbtool_dir():
+def get_mbreplacer_dir():
     """
-    Get the mbtool dir
-    :return str: mbtool root dir
+    Get the mbreplacer dir
+    :return str: mbreplacer root dir
     """
     return os.getcwd()
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MBTool()
+    window = MBReplacer()
     window.show()
     sys.exit(app.exec_())

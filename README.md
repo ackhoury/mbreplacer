@@ -1,7 +1,11 @@
 # mbreplacer
+This is a tool meant for speeding up the process of using multiple people's tools for importing custom monkeyball stages into the game.
 
-This is a tool meant for speeding up the process of using multiple people's tools
-for importing custom monkeyball stages into the game.
+This was created to help a less-software adapt friend that loves monkeyball, but could not for the life of him keep the tool ordering / naming straight.
+
+Eliminates the need to worry about making gma tpl lz files, and replacing them in the root.
+Simply import your stage with the tool, mark it for replacement, choose the stage you want to replace, then hit replace!
+All you need to do after is rebuild root!
 
 The inputs and usage of this tool in the entire process is as follows:
 

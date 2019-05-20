@@ -11,6 +11,8 @@ The inputs and usage of this tool in the entire process is as follows:
 
 ![usage_diagram](mbreplacer_diagram.png)
 
+**mbreplacer (not mbtool)** (too lazy to fix diagram with new name)
+
 ## Installation
 ### Normal people - download and run
 Should work on any python enabled OS. 

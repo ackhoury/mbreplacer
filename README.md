@@ -1,4 +1,7 @@
 # mbreplacer
+
+**PLEASE READ SECTIONS INSTALLATION AND RUNTIME DEPENDENCIES BEFORE USING THE TOOL**
+
 This is a tool meant for speeding up the process of using multiple people's tools
 for importing custom monkeyball stages into the game.
 
@@ -14,7 +17,7 @@ Normal people can just download mbreplacer executable for their OS here:
 https://github.com/ackhoury/mbreplacer/releases
 
 ### Cool people - run with python3
-python3.5 dependencies: `PyQt5==5.12.2
+python3.5 dependencies: `PyQt5==5.12.2`
 ```bash
 sudo pip3 install PyQt5==5.12.2
 ```
@@ -41,7 +44,7 @@ mbreplacer requires:
 - BobJrSenior's `GxModelViewer.exe`: [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
 - CraftedCart's `ws2lzfrontend.exe`: [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
 
-Please put the executables for these tools somewhere in the mbreplacer directory. 
+Please put the contents for these tools somewhere in the mbreplacer directory. 
 mbreplacer will automatically find and import them
 
 ## Pre-steps

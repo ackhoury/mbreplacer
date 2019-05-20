@@ -1,7 +1,5 @@
 # mbreplacer
 
-**PLEASE READ SECTIONS INSTALLATION AND RUNTIME DEPENDENCIES BEFORE USING THE TOOL**
-
 This is a tool meant for speeding up the process of using multiple people's tools
 for importing custom monkeyball stages into the game.
 
@@ -40,9 +38,9 @@ Your executable will be found in the generated `build/` folder
 
 ## Runtime Dependencies
 mbreplacer requires:
-- BobJrSenior's `SMB_LZ_Tool.exe`: [SMB LZ Tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
-- BobJrSenior's `GxModelViewer.exe`: [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
-- CraftedCart's `ws2lzfrontend.exe`: [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
+- BobJrSenior's [SMB LZ Tool](https://bobjrsenior.pw/smb/smblztool/SMB_LZ_Tool.zip)
+- BobJrSenior's [GxModelViewerNoGUI](https://bobjrsenior.pw/smb/gxmodelviewer/GxModelViewerNoGUI.zip)
+- CraftedCart's [SMB Workshop Tool 2](https://bintray.com/craftedcart/the-workshop/smblevelworkshop2-beta/v1.0.0-beta.1)
 
 Please put the contents for these tools somewhere in the mbreplacer directory. 
 mbreplacer will automatically find and import them

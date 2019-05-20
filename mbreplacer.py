@@ -143,7 +143,7 @@ class MBReplacerUI:
         self._import_multiple_stages_btn = QPushButton(self._central_widget)
         self._import_multiple_stages_btn.setGeometry(QtCore.QRect(150, 490, 151, 27))
         self._import_multiple_stages_btn.setObjectName("import_multiple_stages_btn")
-        self._import_multiple_stages_btn.setText("import stages folder")
+        self._import_multiple_stages_btn.setText("import multiple from folder")
 
         self._import_root_btn = QPushButton(self._central_widget)
         self._import_root_btn.setGeometry(QtCore.QRect(10, 10, 161, 31))
